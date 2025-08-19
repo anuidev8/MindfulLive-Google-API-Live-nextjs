@@ -8,6 +8,7 @@ import { useScreenCapture } from "../../hooks/use-screen-capture";
 import { useWebcam } from "../../hooks/use-webcam";
 import { AudioRecorder } from "../../lib/audio-recorder";
 import AudioPulse from "../audio-pulse/AudioPulse";
+import { FiMic, FiMicOff, FiVideo, FiVideoOff, FiMonitor, FiUser, FiPlay, FiPause } from "react-icons/fi";
 
 export type ControlTrayProps = {
   videoRef: RefObject<HTMLVideoElement>;
@@ -19,24 +20,29 @@ export type ControlTrayProps = {
 
 type MediaStreamButtonProps = {
   isStreaming: boolean;
-  onIcon: string;
-  offIcon: string;
+  onIcon: React.ReactNode;
+  offIcon: React.ReactNode;
   start: () => Promise<any>;
   stop: () => any;
 };
 
-/**
- * button used for triggering webcam or screen-capture
- */
 const MediaStreamButton = memo(
   ({ isStreaming, onIcon, offIcon, start, stop }: MediaStreamButtonProps) =>
     isStreaming ? (
-      <button className="action-button" onClick={stop}>
-        <span className="material-symbols-outlined">{onIcon}</span>
+      <button
+        className="p-4 rounded-full bg-white/30 hover:bg-white/50 shadow-lg transition"
+        onClick={stop}
+        aria-label="media-stream-on"
+      >
+        {onIcon}
       </button>
     ) : (
-      <button className="action-button" onClick={start}>
-        <span className="material-symbols-outlined">{offIcon}</span>
+      <button
+        className="p-4 rounded-full bg-white/30 hover:bg-white/50 shadow-lg transition"
+        onClick={start}
+        aria-label="media-stream-off"
+      >
+        {offIcon}
       </button>
     )
 );
@@ -46,7 +52,6 @@ function ControlTray({
   children,
   onVideoStreamChange = () => {},
   supportsVideo,
-  enableEditingSettings,
 }: ControlTrayProps) {
   const videoStreams = [useWebcam(), useScreenCapture()];
   const [activeVideoStream, setActiveVideoStream] =
@@ -122,7 +127,6 @@ function ControlTray({
     };
   }, [connected, activeVideoStream, client, videoRef]);
 
-  //handler for swapping from one video-stream to the next
   const changeStreams = (next?: UseMediaStreamResult) => async () => {
     if (next) {
       const mediaStream = await next.start();
@@ -137,61 +141,82 @@ function ControlTray({
   };
 
   return (
-    <section className="control-tray">
+    <section className="w-full flex flex-col items-center gap-4 mt-6 relative">
+     
       <canvas style={{ display: "none" }} ref={renderCanvasRef} />
-      <nav className={cn("actions-nav", { disabled: !connected })}>
+
+      {/* Actions Row */}
+      <nav
+        className={cn(
+          "flex items-center justify-center gap-6 p-4 bg-white/30 rounded-2xl shadow-2xl border border-white/30",
+         
+        )}
+      >
+        {/* Mic Toggle */}
         <button
-          className={cn("action-button mic-button")}
+          className={cn("p-4 rounded-full bg-white/30 hover:bg-white/50 shadow-lg transition", {
+            "opacity-50 pointer-events-none": !connected
+          })}
           onClick={() => setMuted(!muted)}
+          aria-label="Toggle microphone"
         >
-          {!muted ? (
-            <span className="material-symbols-outlined filled">mic</span>
+          {muted ? (
+            <FiMicOff className="text-2xl" style={{ color: "#f87171" }} />
           ) : (
-            <span className="material-symbols-outlined filled">mic_off</span>
+            <FiMic className="text-2xl" style={{ color: "#38bdf8" }} />
           )}
         </button>
 
-        <div className="action-button no-action outlined">
-          <AudioPulse volume={volume} active={connected} hover={false} />
-        </div>
+       
 
+        {/* Video controls */}
         {supportsVideo && (
           <>
-            <MediaStreamButton
-              isStreaming={screenCapture.isStreaming}
-              start={changeStreams(screenCapture)}
-              stop={changeStreams()}
-              onIcon="cancel_presentation"
-              offIcon="present_to_all"
-            />
+           <MediaStreamButton
+  isStreaming={screenCapture.isStreaming}
+  start={changeStreams(screenCapture)}
+  stop={changeStreams()}
+  onIcon={<FiMonitor className="text-2xl text-blue-400" />}
+  offIcon={<FiMonitor className="text-2xl text-blue-400" />}
+/>
             <MediaStreamButton
               isStreaming={webcam.isStreaming}
               start={changeStreams(webcam)}
               stop={changeStreams()}
-              onIcon="videocam_off"
-              offIcon="videocam"
+              onIcon={<FiVideoOff className="text-2xl text-blue-400" />}
+              offIcon={<FiVideo className="text-2xl text-blue-400" />}
             />
           </>
         )}
+          {/* Connection Section */}
+      <div className="flex flex-col items-center gap-2">
+        <button
+          ref={connectButtonRef}
+          className={cn(
+            "w-16 h-16 flex items-center justify-center rounded-full shadow-xl transition-all duration-200 ",
+            connected
+              ? "bg-gradient-to-br from-cyan-400 to-blue-600  hover:ring-4 hover:ring-cyan-200"
+              : "bg-gradient-to-br from-pink-400 to-red-600  hover:ring-4 hover:ring-pink-200"
+          )}
+          onClick={connected ? disconnect : connect}
+          aria-label={connected ? "Disconnect" : "Connect"}
+        >
+          {connected ? (
+            <FiPause className="text-3xl text-white" />
+          ) : (
+            <FiPlay className="text-3xl text-white" />
+          )}
+        </button>
+      </div>
+      <span className="text-sm font-medium text-gray-600">
+          {connected ? "Streaming" : "Disconnected"}
+        </span>
         {children}
       </nav>
-
-      <div className={cn("connection-container", { connected })}>
-        <div className="connection-button-container">
-          <button
-            ref={connectButtonRef}
-            className={cn("action-button connect-toggle", { connected })}
-            onClick={connected ? disconnect : connect}
-          >
-            <span className="material-symbols-outlined filled">
-              {connected ? "pause" : "play_arrow"}
-            </span>
-          </button>
-        </div>
-        <span className="text-indicator">Streaming</span>
-      </div>
+     
+    
     </section>
   );
 }
 
-export default memo(ControlTray); 
+export default memo(ControlTray);

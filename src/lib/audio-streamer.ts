@@ -42,7 +42,6 @@ export class AudioStreamer {
       // the worklet already exists on this context
       // add the new handler to it
       workletsRecord[workletName].handlers.push(handler);
-      console.log(`[AudioStreamer] Worklet ${workletName} already exists, handler added.`);
       return Promise.resolve(this);
       //throw new Error(`Worklet ${workletName} already exists on context`);
     }
@@ -56,7 +55,6 @@ export class AudioStreamer {
     workletsRecord[workletName] = { handlers: [handler] };
 
     const src = createWorketFromSrc(workletName, workletSrc);
-    console.log(`[AudioStreamer] Loading worklet: ${workletName}`);
     await this.context.audioWorklet.addModule(src);
     const worklet = new AudioWorkletNode(this.context, workletName);
 
@@ -83,7 +81,7 @@ export class AudioStreamer {
         const int16 = dataView.getInt16(i * 2, true);
         float32Array[i] = int16 / 32768;
       } catch (e) {
-        console.error(e);
+        //console.error(e);
       }
     }
     return float32Array;
@@ -108,14 +106,12 @@ export class AudioStreamer {
       this.audioQueue.push(processingBuffer);
       totalPushed += processingBuffer.length;
     }
-    console.log(`[AudioStreamer] Received PCM16 chunk, scheduled ${totalPushed} samples for playback.`);
     // Start playing if not already playing.
     if (!this.isPlaying) {
       this.isPlaying = true;
       // Initialize scheduledTime only when we start playing
       this.scheduledTime = this.context.currentTime + this.initialBufferTime;
       this.scheduleNextBuffer();
-      console.log('[AudioStreamer] Playback started.');
     }
   }
 
@@ -205,7 +201,6 @@ export class AudioStreamer {
         Math.max(0, nextCheckTime - 50)
       );
     }
-    console.log('[AudioStreamer] Scheduling next audio buffer. Queue length:', this.audioQueue.length);
   }
 
   stop() {
