@@ -1,4 +1,6 @@
-
+/**
+ * Utils - Based on official Google example
+ */
 
 export type GetAudioContextOptions = AudioContextOptions & {
   id?: string;

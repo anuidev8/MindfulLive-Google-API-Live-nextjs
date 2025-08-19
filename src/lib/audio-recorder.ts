@@ -1,4 +1,7 @@
 
+/**
+ * Audio Recorder - Based on official Google example
+ */
 
 import { audioContext } from "./utils";
 import AudioRecordingWorklet from "./worklets/audio-processing";

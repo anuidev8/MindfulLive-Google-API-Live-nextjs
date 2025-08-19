@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guided Meditation App
+
+A modern, AI-powered meditation app built with Next.js, featuring a beautiful glassy pastel UI, real-time session guidance, and progress tracking.
+
+## Features
+
+- **AI-Powered Meditation Guide**: Uses Google Gemini AI to recommend session durations, guide users, and provide supportive feedback.
+- **Session Recommendation**: The AI suggests a meditation duration based on your recent activity and state.
+- **Custom Timer**: Start a meditation session with a timer, guided by the AI.
+- **Real-Time Feedback**: Receive supportive feedback and suggestions for your next session when the timer ends.
+- **Progress Tracking**: View your current streak, last session time, and a visual progress bar.
+- **Glassy Pastel UI**: All screens use a modern, glassy, pastel gradient design inspired by leading meditation apps.
+- **Webcam, Screen, and Audio Controls**: Easily toggle your webcam, screen share, and microphone with beautiful circular controls (using Feather icons).
+- **Profile Icon**: User/profile icon in the control tray for a personal touch.
+
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Run the development server:**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Open your browser:**
+   Visit [http://localhost:3000](http://localhost:3000) to use the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/page.tsx` — Main entry, sets up the glassy layout and loads the meditation guide.
+- `src/components/meditation/MeditationGuide.tsx` — Main guided meditation experience, including timer, feedback, progress, and conversation.
+- `src/components/control-tray/ControlTray.tsx` — Glassy, circular controls for mic, video, and screen, with Feather icons and connect/play button.
+- `src/lib/toolDeclarations.ts` — All AI tool definitions (recommendation, set duration, begin timer, feedback) for the Gemini integration.
 
-## Learn More
+## Tool Declarations (AI Integration)
 
-To learn more about Next.js, take a look at the following resources:
+All AI tool definitions are managed in `src/lib/toolDeclarations.ts`:
+- `recommend_duration`: Suggests a session duration and reason.
+- `set_meditation_duration`: User confirms the final duration.
+- `begin_meditation_timer`: Starts the meditation timer.
+- `end_meditation_feedback`: Provides feedback and next session suggestion.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Customization
+- **UI**: Easily adjust colors and gradients in Tailwind classes for your brand.
+- **AI Logic**: Extend or modify tool declarations in `src/lib/toolDeclarations.ts`.
+- **Progress**: Integrate with a backend or local storage for persistent progress tracking.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

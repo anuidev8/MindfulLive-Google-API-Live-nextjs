@@ -1,4 +1,11 @@
 
+
+
+/**
+ * GenAI Live Client - Based on official Google example
+ */
+
+
 import {
   Content,
   GoogleGenAI,
