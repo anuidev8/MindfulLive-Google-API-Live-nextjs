@@ -50,7 +50,9 @@ export default function AudioPulse({ active, volume, hover }: AudioPulseProps) {
         .map((_, i) => (
           <div
             key={i}
-            ref={(el) => (lines.current[i] = el!)}
+            ref={(el) => {
+              if (el) lines.current[i] = el;
+            }}
             style={{
               width: 6,
               borderRadius: 3,

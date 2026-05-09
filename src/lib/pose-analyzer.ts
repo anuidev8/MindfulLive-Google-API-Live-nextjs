@@ -325,82 +325,84 @@ export class PoseAnalyzer extends EventEmitter {
 
   private drawPoseLandmarks(landmarks: any[]): void {
     if (!this.ctx || !this.canvasElement) return;
+    const ctx = this.ctx;
+    const canvasElement = this.canvasElement;
 
     // Enhanced drawing styles
-    this.ctx.fillStyle = '#00FF00';
-    this.ctx.strokeStyle = '#00FF00';
-    this.ctx.lineWidth = 3;
+    ctx.fillStyle = '#00FF00';
+    ctx.strokeStyle = '#00FF00';
+    ctx.lineWidth = 3;
 
     // Draw key landmarks with better visibility
     const keyPoints = [0, 11, 12, 23, 24, 25, 26, 27, 28]; // Nose, shoulders, hips, knees
-    
+
     keyPoints.forEach(index => {
       if (landmarks[index] && landmarks[index].visibility > 0.5) {
-        const x = landmarks[index].x * this.canvasElement!.width;
-        const y = landmarks[index].y * this.canvasElement!.height;
-        
+        const x = landmarks[index].x * canvasElement.width;
+        const y = landmarks[index].y * canvasElement.height;
+
         // Draw landmark circle
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, 8, 0, 2 * Math.PI);
-        this.ctx.fill();
-        
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2 * Math.PI);
+        ctx.fill();
+
         // Add white border for better visibility
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 2;
-        this.ctx.stroke();
-        this.ctx.strokeStyle = '#00FF00';
-        this.ctx.lineWidth = 3;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.strokeStyle = '#00FF00';
+        ctx.lineWidth = 3;
       }
     });
 
     // Draw spine line (nose to hip)
-    if (landmarks[0] && landmarks[23] && this.canvasElement) {
-      const x1 = landmarks[0].x * this.canvasElement.width;
-      const y1 = landmarks[0].y * this.canvasElement.height;
-      const x2 = landmarks[23].x * this.canvasElement.width;
-      const y2 = landmarks[23].y * this.canvasElement.height;
-      
-      this.ctx.strokeStyle = '#00FFFF';
-      this.ctx.lineWidth = 4;
-      this.ctx.beginPath();
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-      this.ctx.stroke();
+    if (landmarks[0] && landmarks[23]) {
+      const x1 = landmarks[0].x * canvasElement.width;
+      const y1 = landmarks[0].y * canvasElement.height;
+      const x2 = landmarks[23].x * canvasElement.width;
+      const y2 = landmarks[23].y * canvasElement.height;
+
+      ctx.strokeStyle = '#00FFFF';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     }
 
     // Draw shoulder line
-    if (landmarks[11] && landmarks[12] && this.canvasElement) {
-      const x1 = landmarks[11].x * this.canvasElement.width;
-      const y1 = landmarks[11].y * this.canvasElement.height;
-      const x2 = landmarks[12].x * this.canvasElement.width;
-      const y2 = landmarks[12].y * this.canvasElement.height;
-      
-      this.ctx.strokeStyle = '#FF00FF';
-      this.ctx.lineWidth = 3;
-      this.ctx.beginPath();
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-      this.ctx.stroke();
+    if (landmarks[11] && landmarks[12]) {
+      const x1 = landmarks[11].x * canvasElement.width;
+      const y1 = landmarks[11].y * canvasElement.height;
+      const x2 = landmarks[12].x * canvasElement.width;
+      const y2 = landmarks[12].y * canvasElement.height;
+
+      ctx.strokeStyle = '#FF00FF';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     }
 
     // Draw hip line
-    if (landmarks[23] && landmarks[24] && this.canvasElement) {
-      const x1 = landmarks[23].x * this.canvasElement.width;
-      const y1 = landmarks[23].y * this.canvasElement.height;
-      const x2 = landmarks[24].x * this.canvasElement.width;
-      const y2 = landmarks[24].y * this.canvasElement.height;
-      
-      this.ctx.strokeStyle = '#FFFF00';
-      this.ctx.lineWidth = 3;
-      this.ctx.beginPath();
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-      this.ctx.stroke();
+    if (landmarks[23] && landmarks[24]) {
+      const x1 = landmarks[23].x * canvasElement.width;
+      const y1 = landmarks[23].y * canvasElement.height;
+      const x2 = landmarks[24].x * canvasElement.width;
+      const y2 = landmarks[24].y * canvasElement.height;
+
+      ctx.strokeStyle = '#FFFF00';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     }
 
     // Reset stroke style
-    this.ctx.strokeStyle = '#00FF00';
-    this.ctx.lineWidth = 3;
+    ctx.strokeStyle = '#00FF00';
+    ctx.lineWidth = 3;
   }
 
   private analyzePosture(landmarks: any[]): PostureAnalysis {

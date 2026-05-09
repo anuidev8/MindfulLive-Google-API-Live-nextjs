@@ -123,7 +123,7 @@ export default function WellnessGuide() {
 
   // FIXED: Google API Config with proper system instructions
   useEffect(() => {
-    setModel("models/gemini-2.0-flash-exp");
+    setModel("gemini-3.1-flash-live-preview");
     setConfig({
       responseModalities: [Modality.AUDIO],
       speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } },

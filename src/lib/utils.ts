@@ -8,14 +8,23 @@ export type GetAudioContextOptions = AudioContextOptions & {
 
 const map: Map<string, AudioContext> = new Map();
 
-export const audioContext: (
-  options?: GetAudioContextOptions
-) => Promise<AudioContext> = (() => {
-  const didInteract = new Promise((res) => {
+let didInteractPromise: Promise<unknown> | null = null;
+
+const getDidInteract = (): Promise<unknown> => {
+  if (didInteractPromise) return didInteractPromise;
+  if (typeof window === "undefined") {
+    return Promise.resolve();
+  }
+  didInteractPromise = new Promise((res) => {
     window.addEventListener("pointerdown", res, { once: true });
     window.addEventListener("keydown", res, { once: true });
   });
+  return didInteractPromise;
+};
 
+export const audioContext: (
+  options?: GetAudioContextOptions
+) => Promise<AudioContext> = (() => {
   return async (options?: GetAudioContextOptions) => {
     try {
       const a = new Audio();
@@ -34,7 +43,7 @@ export const audioContext: (
       }
       return ctx;
     } catch (e) {
-      await didInteract;
+      await getDidInteract();
       if (options?.id && map.has(options.id)) {
         const ctx = map.get(options.id);
         if (ctx) {

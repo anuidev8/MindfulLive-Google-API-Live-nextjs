@@ -21,7 +21,6 @@ import {
 } from "@google/genai";
 
 import { EventEmitter } from "eventemitter3";
-import { difference } from "lodash";
 import { LiveClientOptions, StreamingLog } from "../types";
 import { base64ToArrayBuffer } from "./utils";
 
@@ -154,11 +153,20 @@ export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
   }
 
   protected onerror(e: ErrorEvent) {
+    console.error("[GenAILive] error", e.message, e);
     this.log("server.error", e.message);
     this.emit("error", e);
   }
 
   protected onclose(e: CloseEvent) {
+    const msg = `[GenAILive] websocket closed code=${e.code} reason="${e.reason}" wasClean=${e.wasClean}`;
+    if (e.code === 1000) {
+      console.info(msg);
+    } else {
+      console.error(msg);
+    }
+    this._status = "disconnected";
+    this._session = null;
     this.log(
       `server.close`,
       `disconnected ${e.reason ? `with reason: ${e.reason}` : ``}`
@@ -207,7 +215,7 @@ export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
         const base64s = audioParts.map((p) => p.inlineData?.data);
 
         // strip the audio parts out of the modelTurn
-        const otherParts = difference(parts, audioParts);
+        const otherParts = parts.filter((p) => !audioParts.includes(p));
         // console.log("otherParts", otherParts);
 
         base64s.forEach((b64) => {
@@ -236,14 +244,17 @@ export class GenAILiveClient extends EventEmitter<LiveClientEventTypes> {
    * send realtimeInput, this is base64 chunks of "audio/pcm" and/or "image/jpg"
    */
   sendRealtimeInput(chunks: Array<{ mimeType: string; data: string }>) {
+    if (this._status !== "connected" || !this.session) {
+      return;
+    }
     let hasAudio = false;
     let hasVideo = false;
     for (const ch of chunks) {
-      this.session?.sendRealtimeInput({ media: ch });
       if (ch.mimeType.includes("audio")) {
+        this.session?.sendRealtimeInput({ audio: ch });
         hasAudio = true;
-      }
-      if (ch.mimeType.includes("image")) {
+      } else if (ch.mimeType.includes("image") || ch.mimeType.includes("video")) {
+        this.session?.sendRealtimeInput({ video: ch });
         hasVideo = true;
       }
       if (hasAudio && hasVideo) {
