@@ -1,56 +1,96 @@
-# Guided Meditation App
+# MindfulLive
 
-A modern, AI-powered meditation app built with Next.js, featuring a beautiful glassy pastel UI, real-time session guidance, and progress tracking.
+MindfulLive is a voice-first wellness app built with Next.js and Google's Gemini Live API. The current default experience uses a three-phase wellness flow:
+
+1. **Plan**: Gemini proposes a meditation, breathing, or focus session.
+2. **Execute**: the approved activity runs with a live visual widget and local timer.
+3. **Analysis**: the app renders session insights, progress stats, and a next-session recommendation.
+
+The legacy meditation-only interface is still available at `?wellness=v1`.
 
 ## Features
 
-- **AI-Powered Meditation Guide**: Uses Google Gemini AI to recommend session durations, guide users, and provide supportive feedback.
-- **Session Recommendation**: The AI suggests a meditation duration based on your recent activity and state.
-- **Custom Timer**: Start a meditation session with a timer, guided by the AI.
-- **Real-Time Feedback**: Receive supportive feedback and suggestions for your next session when the timer ends.
-- **Progress Tracking**: View your current streak, last session time, and a visual progress bar.
-- **Glassy Pastel UI**: All screens use a modern, glassy, pastel gradient design inspired by leading meditation apps.
-- **Webcam, Screen, and Audio Controls**: Easily toggle your webcam, screen share, and microphone with beautiful circular controls (using Feather icons).
-- **Profile Icon**: User/profile icon in the control tray for a personal touch.
-
+- **Voice-first Gemini Live guidance** using `gemini-3.1-flash-live-preview` and the Aoede voice.
+- **Plan approval flow** with an on-screen approval card for accepting, revising, or declining a proposed session.
+- **Three wellness activities**:
+  - meditation with a circular countdown
+  - breathing with the existing breathing visualizer and audio breathing analyzer
+  - focus with lazy MediaPipe pose tracking
+- **Analysis widgets** for summary, progress, and next-session recommendations.
+- **Persistent progress** using SSR-safe `localStorage` hydration.
+- **Legacy fallback** at `/ ?wellness=v1` for the previous guided meditation UI.
 
 ## Getting Started
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+Install dependencies:
 
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+```bash
+npm install
+```
 
-3. **Open your browser:**
-   Visit [http://localhost:3000](http://localhost:3000) to use the app.
+Create a local environment file with your Gemini API key:
+
+```bash
+NEXT_PUBLIC_GOOGLE_API_KEY=your_google_api_key
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open the app:
+
+- v2 default: [http://localhost:3000](http://localhost:3000)
+- legacy v1: [http://localhost:3000/?wellness=v1](http://localhost:3000/?wellness=v1)
+
+If port 3000 is already occupied, Next.js will choose the next available port.
+
+## Verification
+
+Run a production build before shipping changes:
+
+```bash
+npm run build
+```
+
+Manual smoke test:
+
+1. Open the v2 default route.
+2. Click connect and grant microphone permissions.
+3. Ask for a meditation, breathing, or focus session.
+4. Confirm that a plan card appears.
+5. Accept the plan by clicking the card or saying yes.
+6. Confirm the activity widget runs and then transitions to analysis.
+7. Reload and confirm progress stats persist.
 
 ## Project Structure
 
-- `src/app/page.tsx` — Main entry, sets up the glassy layout and loads the meditation guide.
-- `src/components/meditation/MeditationGuide.tsx` — Main guided meditation experience, including timer, feedback, progress, and conversation.
-- `src/components/control-tray/ControlTray.tsx` — Glassy, circular controls for mic, video, and screen, with Feather icons and connect/play button.
-- `src/lib/toolDeclarations.ts` — All AI tool definitions (recommendation, set duration, begin timer, feedback) for the Gemini integration.
+- `src/app/page.tsx`: Route entry. Defaults to v2 and keeps legacy behind `?wellness=v1`.
+- `src/components/wellness-shell.tsx`: Main v2 shell for camera/audio controls and phase rendering.
+- `src/components/wellness-live-bridge.tsx`: Gemini Live tool-call bridge into the wellness reducer.
+- `src/context/wellness-context.tsx`: Reducer, provider, activity state, analysis widgets, and history hydration.
+- `src/lib/tool-declarations/`: Plan, execute, and analysis tool declarations for Gemini Live.
+- `src/lib/system-instruction.ts`: Voice-first system prompt and UI contract guidance.
+- `src/lib/a2ui/wellness-ui-contract.ts`: A2UI-shaped surface contract used by the prompt and widgets.
+- `src/lib/wellness-storage.ts`: localStorage persistence and progress stat calculation.
+- `src/components/phases/`: Plan, execute, and analysis phase renderers.
+- `src/components/activities/`: Meditation, breathing, and focus activity widgets.
+- `src/components/widgets/`: Plan approval and analysis widgets.
+- `src/components/meditation/MeditationGuide.tsx`: Legacy v1 guided meditation experience.
+- `src/components/control-tray/ControlTray.tsx`: Shared microphone, camera, screen, and connection controls.
 
-## Tool Declarations (AI Integration)
+## AI Tool Flow
 
-All AI tool definitions are managed in `src/lib/toolDeclarations.ts`:
-- `recommend_duration`: Suggests a session duration and reason.
-- `set_meditation_duration`: User confirms the final duration.
-- `begin_meditation_timer`: Starts the meditation timer.
-- `end_meditation_feedback`: Provides feedback and next session suggestion.
+The v2 Gemini tool vocabulary is split by phase:
 
-## Customization
-- **UI**: Easily adjust colors and gradients in Tailwind classes for your brand.
-- **AI Logic**: Extend or modify tool declarations in `src/lib/toolDeclarations.ts`.
-- **Progress**: Integrate with a backend or local storage for persistent progress tracking.
+- Plan: `propose_wellness_plan`, `revise_wellness_plan`, `cancel_plan_proposal`, `confirm_wellness_plan`
+- Execute: `start_wellness_activity`, `update_activity_widget`, `complete_wellness_activity`, `cancel_wellness_activity`
+- Analysis: `emit_analysis_summary`, `emit_streak_update`, `emit_next_recommendation`
 
+Tool calls are handled in `src/components/wellness-live-bridge.tsx`, which validates basic argument shape, dispatches reducer actions, and immediately returns tool responses to Gemini Live.
 
+## CopilotKit Status
+
+The reference architecture targets a CopilotKit/A2UI renderer setup. This repo currently implements the A2UI-shaped local surfaces and Gemini Live bridge without adding CopilotKit runtime packages, so the app builds cleanly with the dependencies already present. The next step is to add the CopilotKit puppet runtime once the package versions are installed and verified.
